@@ -49,7 +49,7 @@ import org.apache.http.protocol.HttpContext;
 import org.apache.http.util.EntityUtils;
 import org.junit.Test;
 
-public class Test1 {
+public class TestHttpClient {
 
 	@Test
 	public void testHttpGet() {
