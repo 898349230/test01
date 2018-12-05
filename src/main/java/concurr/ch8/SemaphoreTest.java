@@ -9,7 +9,7 @@ public class SemaphoreTest {
 	private static final int THREAD_COUNT = 30;
 	private static ExecutorService threadPool = Executors.newFixedThreadPool(THREAD_COUNT);
 	// Semaphore（10）表示允许10个线程获取许可证，也就是最大并发数是10
-	private static Semaphore s = new Semaphore(10);
+	private static Semaphore semaphore = new Semaphore(10);
 
 	/**
 	 * Semaphore可以用于做流量控制
@@ -30,10 +30,10 @@ public class SemaphoreTest {
 				public void run() {
 					try {
 //						acquire()方法获取一个许可证, 也可用tryAcquire()方法尝试获取许可证
-						s.acquire();
-						System.out.println("save data  " + "availablePermits = " + s.availablePermits() + "  getQueueLength = " + s.getQueueLength() + "  hasQueuedThreads = " + s.hasQueuedThreads());
+						semaphore.acquire();
+						System.out.println("save data  " + "availablePermits = " + semaphore.availablePermits() + "  getQueueLength = " + semaphore.getQueueLength() + "  hasQueuedThreads = " + semaphore.hasQueuedThreads());
 //						release()方法归还许可证
-						s.release();
+						semaphore.release();
 					} catch (InterruptedException e) {
 					}
 				}
