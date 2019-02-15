@@ -20,7 +20,7 @@ public class CountDownLatchTest {
 		
 	}
 	
-	static CountDownLatch c = new CountDownLatch(2); 
+	static CountDownLatch countDownLatch = new CountDownLatch(2);
 
 	/**
 	 * 使用CountDownLatch
@@ -33,11 +33,11 @@ public class CountDownLatchTest {
 			@Override
 			public void run() {
 				System.out.println(1);
-				c.countDown();
+				countDownLatch.countDown();
 				System.out.println(2);
-				c.countDown();
+				countDownLatch.countDown();
 				try {
-//					当前线程 sleep 100ms，c.await()方法所在的线程中的 “3”会优先于“AAAA”打印
+//					当前线程 sleep 100ms，countDownLatch.await()方法所在的线程中的 “3”会优先于“AAAA”打印
 					Thread.sleep(100);
 				} catch (InterruptedException e) {
 					e.printStackTrace();
@@ -45,8 +45,8 @@ public class CountDownLatchTest {
 				System.out.println("AAAA");
 			}
 		}).start();
-		
-		c.await();
+
+		countDownLatch.await();
 		System.out.println("3");
 	}
 	
