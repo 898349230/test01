@@ -99,7 +99,7 @@ public class RMQReceiver {
                     e.printStackTrace();
                 } finally {
 //                    确认消息， 如果autoAck = false 必须代码确认消息，否则该条消息一直处于 Unacked 状态，没有被消费掉
-//                    channel.basicAck(envelope.getDeliveryTag(), false);
+                    channel.basicAck(envelope.getDeliveryTag(), false);
                     System.out.println("envelope.getDeliveryTag() : " + envelope.getDeliveryTag());
                     System.out.println("Done ");
                 }
