@@ -3,16 +3,11 @@ package mq.rabbit;
 import java.io.IOException;
 import java.util.concurrent.TimeoutException;
 
+import com.rabbitmq.client.*;
 import org.apache.activemq.broker.ConsumerBrokerExchange;
 import org.springframework.format.support.FormatterPropertyEditorAdapter;
 
-import com.rabbitmq.client.Channel;
-import com.rabbitmq.client.Connection;
-import com.rabbitmq.client.Consumer;
-import com.rabbitmq.client.DefaultConsumer;
-import com.rabbitmq.client.Envelope;
 import com.rabbitmq.client.AMQP.BasicProperties;
-import com.rabbitmq.client.BuiltinExchangeType;
 
 public class RMQReceiver {
 
@@ -25,11 +20,11 @@ public class RMQReceiver {
 
     public static void main(String[] args) throws IOException {
 //		接受一条消息
-        one2OneRecever();
+//        one2OneRecever();
 
 //		测试两个 consumer同时接收一个producer生产的数据
 //		先启动两个 consumer，再启动producer，会发现无论几个consumer，queue中的每一条消息都会按顺序轮询发送给consumer
-//		testWorkQueue();
+		testWorkQueue();
 
 //		测试 exchange
 //		testWorkQueueExchange();
@@ -80,7 +75,8 @@ public class RMQReceiver {
 
     /**
      * 测试一个生产者 多个消费者
-     * ack，持久化，
+     * ack，
+     * 持久化，
      *
      * @throws IOException
      */
@@ -94,34 +90,79 @@ public class RMQReceiver {
             @Override
             public void handleDelivery(String consumerTag, Envelope envelope, BasicProperties properties, byte[] body)
                     throws IOException {
+                System.out.println("start ");
                 String message = new String(body, "utf-8");
-                System.out.println("reveive : " + message);
+                System.out.println("reveive : " + message + " consumerTag : " + consumerTag + " isRedeliver() : " + envelope.isRedeliver());
                 try {
                     doWork(message);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 } finally {
-                    System.out.println("Done ");
-                    channel.basicAck(envelope.getDeliveryTag(), false);
+//                    确认消息， 如果autoAck = false 必须代码确认消息，否则该条消息一直处于 Unacked 状态，没有被消费掉
+//                    channel.basicAck(envelope.getDeliveryTag(), false);
                     System.out.println("envelope.getDeliveryTag() : " + envelope.getDeliveryTag());
+                    System.out.println("Done ");
                 }
+            }
+//            隐示取消
+            @Override
+            public void handleCancel(String consumerTag) {
+                System.out.println("handleCancel...  consumerTag = " + consumerTag);
+            }
+//            显示取消
+            @Override
+            public void handleCancelOk(String consumerTag) {
+                System.out.println("handleCancelOk...  consumerTag = " + consumerTag);
+            }
+//          会在任何其他回调之前传递消费者标签给Consumer
+            @Override
+            public void handleConsumeOk(String consumerTag) {
+                System.out.println("handleConsumeOk...  consumerTag = " + consumerTag);
+            }
+//            当通道和连接关闭时
+            @Override
+            public void handleShutdownSignal(String consumerTag, ShutdownSignalException sig) {
+                System.out.println("handleShutdownSignal...  consumerTag = " + consumerTag);
             }
         };
 //		true 时 ack 关闭  , 如果一个worker意外挂了，已经分发给这个worker的消息都不会被执行了
 //		boolean autoAck = true;
 
 //		set this flag to false and send a proper acknowledgment from the worker, once we're done with a task.
-//		ack 开启 , 如果一个worker意外挂了，已经分发给这个worker的未执行的，未成功执行的消息都会被重新发送给其他健康的worker，保证queue中的每条消息都没执行
+//		ack 开启 , 如果一个worker意外挂了，已经分发给这个worker的未执行的，未成功执行的消息都会被重新发送给其他健康的worker，保证queue中的每条消息都被执行
 //				 如果server stop了，消息还是会丢
         boolean autoAck = false;
-        channel.basicConsume(QUEUE_NAME, autoAck, consumer);
+        String consumerTag = "myConsumerTag";
+        channel.basicConsume(QUEUE_NAME, autoAck, consumerTag, consumer);
+//        显式地检索消息, 随机从queue中获取一条消息
+//        GetResponse response = channel.basicGet(QUEUE_NAME, autoAck);
+//        if(null == response){
+//
+//        }else{
+//            BasicProperties props = response.getProps();
+//            System.out.println(" ContentType : " + props.getContentType());
+//            byte[] body = response.getBody();
+//            String message = new String(body, "utf-8");
+//            System.out.println("response message " + message + " DeliveryTag = " + response.getEnvelope().getDeliveryTag());
+//        }
+
+//        明确地取消一个特定的Consumer
+//        channel.basicCancel(consumerTag);
+
+//        try {
+//        关闭通道
+//            channel.close();
+//        } catch (TimeoutException e) {
+//            e.printStackTrace();
+//        }
     }
 
     private static void doWork(String message) throws InterruptedException {
         for (char ch : message.toCharArray()) {
-            if (ch == '.')
+            if (ch == '.'){
 //		        模拟忙碌状态，线程sleep
-                Thread.sleep(1000);
+//                Thread.sleep(1000);
+            }
         }
     }
 
@@ -146,7 +187,6 @@ public class RMQReceiver {
             public void handleDelivery(String consumerTag, Envelope envelope, BasicProperties properties, byte[] body)
                     throws IOException {
                 String message = new String(body, "utf-8");
-                System.out.println("reveive : " + message);
             }
         };
         channel.basicConsume(queueName, true, consumer);

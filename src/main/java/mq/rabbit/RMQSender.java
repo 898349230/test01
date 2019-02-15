@@ -44,18 +44,19 @@ public class RMQSender {
 	
 	public static void main(String[] args) throws IOException, InterruptedException, TimeoutException {
 //		发送一条消息
-		one2OneSender(" 1");
+//		one2OneSender(" 啊");
 		
 //		测试两个 consumer同时接收一个producer生产的数据
 //		先启动两个 consumer，再启动producer，会发现无论几个consumer，queue中的每一条消息都会按顺序轮询发送给consumer
-//		for(int i = 1; i<= 10; i++) {
-//			String num = ""; 
-//			for(int j = 1 ; j <= i; j++) {
-//				num += "."; 
-//			}
-//			testWorkQueue(new String[] {"第 " + i + " 条"," message" + num});
-//		}
-		
+		for(int i = 1; i<= 10; i++) {
+			String num = "";
+			for(int j = 1 ; j <= i; j++) {
+				num += ".";
+			}
+			testWorkQueue(new String[] {"第 " + i + " 条"," message" + num});
+		}
+
+
 //		测试 exchange， 如果启动两个consumer，一个producer，每个consumer都会收到producer生产的每条消息
 //		publish/subscribe模式
 //		for(int i = 1; i<= 100; i++) {
@@ -203,7 +204,6 @@ public class RMQSender {
 	 *   * 表示匹配一个    * (star) can substitute for exactly one word.
 	 *   # 表示匹配所有    # (hash) can substitute for zero or more words.
 	 *   如果一个producer产生的消息同时匹配到多个routingKey，该消息也只能被分发到一个queue中
-	 * @param args
 	 * @throws IOException
 	 */
 	private static void testWorkQueueTopic() throws IOException, TimeoutException {
