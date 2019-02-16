@@ -48,21 +48,21 @@ public class RMQSender {
 		
 //		测试两个 consumer同时接收一个producer生产的数据
 //		先启动两个 consumer，再启动producer，会发现无论几个consumer，queue中的每一条消息都会按顺序轮询发送给consumer
-		for(int i = 1; i<= 10; i++) {
-			String num = "";
-			for(int j = 1 ; j <= i; j++) {
-				num += ".";
-			}
-			testWorkQueue(new String[] {"第 " + i + " 条"," message" + num});
-		}
+//		for(int i = 1; i<= 10; i++) {
+//			String num = "";
+//			for(int j = 1 ; j <= i; j++) {
+//				num += ".";
+//			}
+//			testWorkQueue(new String[] {"第 " + i + " 条"," message" + num});
+//		}
 
 
 //		测试 exchange， 如果启动两个consumer，一个producer，每个consumer都会收到producer生产的每条消息
 //		publish/subscribe模式
 //		for(int i = 1; i<= 100; i++) {
-//			String num = ""; 
+//			String num = "";
 //			for(int j = 1 ; j <= i; j++) {
-//				num += "."; 
+//				num += ".";
 //			}
 //			Thread.sleep(500);
 //			testWorkQueueExchange(new String[] {"第 " + i + " 条"," message" + num});
@@ -76,9 +76,9 @@ public class RMQSender {
 //		}
 		
 //		测试routingKey为topic
-//		for(int i = 0; i < 10; i++) {
-//			testWorkQueueTopic();
-//		}
+		for(int i = 0; i < 10; i++) {
+			testWorkQueueTopic();
+		}
 	}
 	
 	/**
@@ -141,6 +141,11 @@ public class RMQSender {
 		Connection connection = RabbitMqConnectionBuildFactory.getConnection();
 		Channel channel = connection.createChannel();
 //		producer将消息给exchange，exchange将消息给consumer，  有四种类型direct, topic, headers ,fanout.
+//		headers ： 根据发送的消息内容中的headers属性进行匹配，
+// 					Hash结构中要求携带一个键“x-match”，这个键的value可以是any或者all，
+// 					这代表消息携带的Hash是需要全部匹配(all)，还是仅匹配一个键(any)就可以了（需要匹配key 和 value）
+
+//		fanout ：消息会被发送到所有与该exchange绑定的queue中
 		channel.exchangeDeclare(EXCHANGE_NAME, BuiltinExchangeType.FANOUT);
 
 		String message = getMessage(str);
@@ -176,14 +181,14 @@ public class RMQSender {
 		channel.exchangeDeclare(EXCHANGE_NAME_ROUTING, BuiltinExchangeType.DIRECT);
 //		随机生成日志级别作为routingKey
 		String serverity = getSeverity(args);
-		String message = getMessage(args);
+//		String message = getMessage(args);
+		String message = serverity;
 //		发布消息 routingKey为serverity
 		channel.basicPublish(EXCHANGE_NAME_ROUTING, serverity, null, message.getBytes("utf-8"));
 		System.out.println("send  routingKey:" + serverity + "  message:" + message);
 //		try {
 //			channel.close();
 //		} catch (TimeoutException e) {
-//			// TODO Auto-generated catch block
 //			e.printStackTrace();
 //		}
 //		connection.close();
@@ -213,7 +218,7 @@ public class RMQSender {
 		channel.exchangeDeclare(EXCHANGE_NAME_ROUTING_TOPIC, BuiltinExchangeType.TOPIC);
 //		随机生成 一定规则的routingKey作为测试
 		String routingKey = getRoutingKey4Topic();
-		System.out.println("send " + " routingKey:" + routingKey + "  message: " + routingKey);
+		System.out.println("send " + " routingKey: " + routingKey + "  message: " + routingKey);
 		channel.basicPublish(EXCHANGE_NAME_ROUTING_TOPIC, routingKey, null, routingKey.getBytes());
 		channel.close();
 	}

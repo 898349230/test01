@@ -24,7 +24,7 @@ public class RMQReceiver {
 
 //		测试两个 consumer同时接收一个producer生产的数据
 //		先启动两个 consumer，再启动producer，会发现无论几个consumer，queue中的每一条消息都会按顺序轮询发送给consumer
-		testWorkQueue();
+//		testWorkQueue();
 
 //		测试 exchange
 //		testWorkQueueExchange();
@@ -34,8 +34,8 @@ public class RMQReceiver {
 //		testWorkQueueRoutingKey(arr);
 
 //		测试routingKey为topic
-//		String[] arr = new String[] {"*.*.rabbit", "#.rabbit", "*.orange.*", "lazy.#"};
-//		testWorkQueueTopic(arr);
+		String[] arr = new String[] {"*.*.rabbit", "#.rabbit", "*.orange.*", "lazy.#"};
+		testWorkQueueTopic(arr);
     }
 
     /**
@@ -100,7 +100,7 @@ public class RMQReceiver {
                 } finally {
 //                    确认消息， 如果autoAck = false 必须代码确认消息，否则该条消息一直处于 Unacked 状态，没有被消费掉
                     channel.basicAck(envelope.getDeliveryTag(), false);
-                    System.out.println("envelope.getDeliveryTag() : " + envelope.getDeliveryTag());
+//                    System.out.println("envelope.getDeliveryTag() : " + envelope.getDeliveryTag());
                     System.out.println("Done ");
                 }
             }
@@ -133,6 +133,7 @@ public class RMQReceiver {
 //				 如果server stop了，消息还是会丢
         boolean autoAck = false;
         String consumerTag = "myConsumerTag";
+//        consumer 中 handleConsumeOk 方法执行
         channel.basicConsume(QUEUE_NAME, autoAck, consumerTag, consumer);
 //        显式地检索消息, 随机从queue中获取一条消息
 //        GetResponse response = channel.basicGet(QUEUE_NAME, autoAck);
@@ -146,15 +147,19 @@ public class RMQReceiver {
 //            System.out.println("response message " + message + " DeliveryTag = " + response.getEnvelope().getDeliveryTag());
 //        }
 
-//        明确地取消一个特定的Consumer
+//        明确地取消一个特定的Consumer， consumer 中 handleCancelOk 方法执行
 //        channel.basicCancel(consumerTag);
 
+//         删除一个queue  consumer 的 handleCancel 方法会执行
+//          channel.queueDelete(QUEUE_NAME);
 //        try {
-//        关闭通道
+////        关闭通道  consumer 中 handleShutdownSignal 方法没有执行，不知道为什么
 //            channel.close();
+////            connection.close();
 //        } catch (TimeoutException e) {
 //            e.printStackTrace();
 //        }
+        System.out.println("ssssssssssssssssssssss");
     }
 
     private static void doWork(String message) throws InterruptedException {
@@ -177,7 +182,7 @@ public class RMQReceiver {
 //		随机生成一个 non-durable, exclusive, autodelete 的queue
         String queueName = channel.queueDeclare().getQueue();
         channel.exchangeDeclare(EXCHANGE_NAME, BuiltinExchangeType.FANOUT);
-//		queue与 exchange绑定， fanout 类型不需要 routingKey，忽略为"" 
+//		queue与 exchange绑定， fanout 类型不需要 routingKey，忽略为""
 //		只有当这个channel启动时consumer才会从exchange中拉取即时消息，之前的消息不会再次拉取
         channel.queueBind(queueName, EXCHANGE_NAME, "");
 
@@ -187,8 +192,10 @@ public class RMQReceiver {
             public void handleDelivery(String consumerTag, Envelope envelope, BasicProperties properties, byte[] body)
                     throws IOException {
                 String message = new String(body, "utf-8");
+                System.out.println("message : " + message);
             }
         };
+
         channel.basicConsume(queueName, true, consumer);
     }
 
@@ -202,6 +209,10 @@ public class RMQReceiver {
         Connection connection = RabbitMqConnectionBuildFactory.getConnection();
         Channel channel = connection.createChannel();
         String queueName = channel.queueDeclare().getQueue();
+
+//        channel 只绑定 routingKey 为 info 的
+//        channel.queueBind(queueName, EXCHANGE_NAME_ROUTING, "info");
+
         for (String serverity : args) {
 //			将不同级别的routingKey和exchange，queue绑定
             channel.queueBind(queueName, EXCHANGE_NAME_ROUTING, serverity);
@@ -213,6 +224,7 @@ public class RMQReceiver {
                     throws IOException {
                 String message = new String(body, "utf-8");
                 System.out.println(envelope.getDeliveryTag() + " routingKey:" + envelope.getRoutingKey() + "  " + "reveive :" + message);
+                channel.basicAck(envelope.getDeliveryTag(), false);
             }
         };
         channel.basicConsume(queueName, false, consumer);
