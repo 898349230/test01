@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -18,7 +19,6 @@ public class JSONUtils {
     }
 
     public static ObjectMapper getInstance() {
-
         return objectMapper;
     }
 
@@ -56,11 +56,15 @@ public class JSONUtils {
     /**
      * json string convert to map with javaBean
      */
-    public static <T> Map<String, T> json2map(String jsonStr, Class<T> clazz)
-            throws Exception {
-        Map<String, Map<String, Object>> map = objectMapper.readValue(jsonStr,
-                new TypeReference<Map<String, T>>() {
-                });
+    public static <T> Map<String, T> json2map(String jsonStr, Class<T> clazz) {
+        Map<String, Map<String, Object>> map = null;
+        try {
+            map = objectMapper.readValue(jsonStr,
+                    new TypeReference<Map<String, T>>() {
+                    });
+        } catch (IOException e) {
+            return null;
+        }
         Map<String, T> result = new HashMap<>();
         for (Map.Entry<String, Map<String, Object>> entry : map.entrySet()) {
             result.put(entry.getKey(), map2pojo(entry.getValue(), clazz));
@@ -71,11 +75,15 @@ public class JSONUtils {
     /**
      * json array string convert to list with javaBean
      */
-    public static <T> List<T> json2list(String jsonArrayStr, Class<T> clazz)
-            throws Exception {
-        List<Map<String, Object>> list = objectMapper.readValue(jsonArrayStr,
-                new TypeReference() {
-                });
+    public static <T> List<T> json2list(String jsonArrayStr, Class<T> clazz) {
+        List<Map<String, Object>> list = null;
+        try {
+            list = objectMapper.readValue(jsonArrayStr,
+                    new TypeReference() {
+                    });
+        } catch (IOException e) {
+            return null;
+        }
         List<T> result = new ArrayList<>();
         for (Map<String, Object> map : list) {
             result.add(map2pojo(map, clazz));
