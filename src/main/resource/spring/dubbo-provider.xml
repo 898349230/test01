@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xmlns:dubbo="http://dubbo.apache.org/schema/dubbo"
+        xmlns="http://www.springframework.org/schema/beans"
+        xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+       http://dubbo.apache.org/schema/dubbo http://dubbo.apache.org/schema/dubbo/dubbo.xsd">
+
+
+    <dubbo:application name="demo-provider"/>
+
+    <!-- use multicast registry center to export service -->
+    <!-- 使用zookeeper注册服务 -->
+    <dubbo:registry group="dubbo01" address="zookeeper://aliyun.com:2181"/>
+    <dubbo:registry address="zookeeper://aliyun.com:2181"/>
+
+    <!-- use dubbo protocol to export service on port 20880 -->
+    <dubbo:protocol name="dubbo" port="20890"/>
+    <!-- 注册 service -->
+    <bean id="helloService" class="dubbo.impl.HelloServiceImpl01"/>
+    <dubbo:service interface="dubbo.api.IHelloService" ref="helloService"/>
+
+</beans>
