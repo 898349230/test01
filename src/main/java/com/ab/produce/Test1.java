@@ -4,8 +4,8 @@ public class Test1 {
 	public static void main(String[] args) {
 		Apple apple = new Apple();
 		for(int i=0;i<50;i++){
-			new Thread(new Produce(apple)).start();;
-			new Thread(new Consume(apple)).start();;
+			new Thread(new Produce(apple)).start();
+			new Thread(new Consume(apple)).start();
 		}
 	}
 }
