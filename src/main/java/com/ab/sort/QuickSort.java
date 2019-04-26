@@ -34,7 +34,39 @@ public class QuickSort {
 		QuickSort sort = new QuickSort();
 		sort.quickSort(strVoid, 0, strVoid.length - 1);
 		for (int i = 0; i < strVoid.length; i++) {
-			System.out.println(strVoid[i] + " ");
+			System.out.print(strVoid[i] + " ");
 		}
+
+		System.out.println("              ");
+		int[] arr = {9,4,6,3,8};
+		quickSort2(arr, 0, arr.length);
+		for (int a: arr) {
+			System.out.print(a + "  ");
+		}
+	}
+
+	private static void quickSort2(int[] arr, int left, int right){
+		if(left < right){
+			int index = getIndex(arr, left, right-1);
+			quickSort2(arr, 0, index);
+			quickSort2(arr, index, right-1);
+		}
+	}
+
+	private static int getIndex(int[] arr, int left, int right){
+
+		int temp = arr[left];
+		while(left < right){
+			while(arr[right] > temp && left < right){
+				right--;
+			}
+			arr[left] = arr[right];
+			while(arr[left] < temp && left < right){
+				left++;
+			}
+			arr[right] = arr[left];
+		}
+		arr[left] = temp;
+		return left;
 	}
 }
