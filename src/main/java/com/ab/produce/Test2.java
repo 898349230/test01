@@ -79,7 +79,7 @@ class Producer extends Thread{
     }
 }
 
-class Consumer2 extends Thread{
+class Consumer2 implements Runnable{
     private Bucket bucket;
 
     public Consumer2(Bucket bucket) {
@@ -93,7 +93,7 @@ class Consumer2 extends Thread{
         }
     }
 }
-class Producer2 extends Thread{
+class Producer2 implements Runnable{
     private Bucket bucket;
 
     public Producer2(Bucket bucket) {
